@@ -9,95 +9,122 @@ class Program
 
         // Cenário 1
         Console.WriteLine("CENÁRIO 1:");
-        int[] arr1 = { 3, 2, 1, 6, 0, 5 };
-        Console.WriteLine($"Array de entrada: [{string.Join(", ", arr1)}]");
-        PrintArvore(arr1);
+        int[] arranjo1 = { 3, 2, 1, 6, 0, 5 };
+        Console.WriteLine($"Array de entrada: [{string.Join(", ", arranjo1)}]");
+        ImprimirArvore(arranjo1);
         Console.WriteLine("\n" + new string('=', 50) + "\n");
 
         // Cenário 2
         Console.WriteLine("CENÁRIO 2:");
-        int[] arr2 = { 7, 5, 13, 9, 1, 6, 4 };
-        Console.WriteLine($"Array de entrada: [{string.Join(", ", arr2)}]");
-        PrintArvore(arr2);
+        int[] arranjo2 = { 7, 5, 13, 9, 1, 6, 4 };
+        Console.WriteLine($"Array de entrada: [{string.Join(", ", arranjo2)}]");
+        ImprimirArvore(arranjo2);
         Console.WriteLine("\n" + new string('=', 50));
     }
 
-    static void PrintArvore(int[] arr)
+    static void ImprimirArvore(int[] arranjo)
     {
-        if (arr == null || arr.Length == 0)
+        if (arranjo == null || arranjo.Length == 0)
             return;
 
-        int max = arr.Max();
-        int maxIndex = Array.IndexOf(arr, max);
-
-        var esquerda = arr.Take(maxIndex).OrderByDescending(x => x).ToArray();
-        var direita = arr.Skip(maxIndex + 1).OrderByDescending(x => x).ToArray();
-
+        var dadosArvore = ObterDadosArvore(arranjo);
         Console.WriteLine("\nEstrutura da árvore (níveis horizontais):");
+        
+        ImprimirRaiz(dadosArvore.raiz, dadosArvore.espacoRaiz);
+        ImprimirBarrasRaiz(dadosArvore.temFilhoEsquerda, dadosArvore.temFilhoDireita, dadosArvore.espacoRaiz);
+        ImprimirNiveis(dadosArvore.elementosEsquerda, dadosArvore.elementosDireita);
+    }
 
-        // Controle de espaços por nível
-        int espacoRaiz = 20;      // Espaço antes da raiz
-        int espacoInicial = 17;   // Espaço inicial para os primeiros números
-        int incremento = 8;       // Quanto aumenta o espaço entre os números
+    static (int raiz, int[] elementosEsquerda, int[] elementosDireita, bool temFilhoEsquerda, bool temFilhoDireita, int espacoRaiz) ObterDadosArvore(int[] arranjo)
+    {
+        int raiz = arranjo.Max();
+        int indiceRaiz = Array.IndexOf(arranjo, raiz);
+        
+        var elementosEsquerda = arranjo.Take(indiceRaiz).OrderByDescending(x => x).ToArray();
+        var elementosDireita = arranjo.Skip(indiceRaiz + 1).OrderByDescending(x => x).ToArray();
 
-        // Imprime a raiz
-        Console.WriteLine(new string(' ', espacoRaiz) + max);
+        return (
+            raiz: raiz,
+            elementosEsquerda: elementosEsquerda,
+            elementosDireita: elementosDireita,
+            temFilhoEsquerda: elementosEsquerda.Length > 0,
+            temFilhoDireita: elementosDireita.Length > 0,
+            espacoRaiz: 20
+        );
+    }
 
-        // Imprime as barras da raiz
-        if (esquerda.Length > 0 || direita.Length > 0)
+    static void ImprimirRaiz(int valorRaiz, int espacoRaiz)
+    {
+        Console.WriteLine(new string(' ', espacoRaiz) + valorRaiz);
+    }
+
+    static void ImprimirBarrasRaiz(bool temFilhoEsquerda, bool temFilhoDireita, int espacoRaiz)
+    {
+        if (temFilhoEsquerda || temFilhoDireita)
         {
-            string barras = (esquerda.Length > 0 && direita.Length > 0) ? "/   \\" :
-                           (esquerda.Length > 0) ? "/" : "\\";
+            string barras = (temFilhoEsquerda && temFilhoDireita) ? "/   \\" :
+                           temFilhoEsquerda ? "/" : "\\";
             Console.WriteLine(new string(' ', espacoRaiz - 1) + barras);
         }
+    }
 
-        // Imprime os níveis seguintes
-        int maxLen = Math.Max(esquerda.Length, direita.Length);
-        for (int nivel = 0; nivel < maxLen; nivel++)
+    static void ImprimirNiveis(int[] elementosEsquerda, int[] elementosDireita)
+    {
+        int espacoInicial = 17;   // Espaço inicial para os primeiros números
+        int incremento = 8;       // Quanto aumenta o espaço entre os números
+        int maxNiveis = Math.Max(elementosEsquerda.Length, elementosDireita.Length);
+
+        for (int nivel = 0; nivel < maxNiveis; nivel++)
         {
-            // Calcula os espaços para este nível (garantindo mínimo de 2 espaços)
             int espacoEsquerda = Math.Max(2, espacoInicial - (nivel * 2));
             int espacoDireita = espacoInicial + incremento + (nivel * 2);
 
-            // Imprime os valores do nível
-            string linha = "";
+            ImprimirNivel(nivel, espacoEsquerda, espacoDireita, elementosEsquerda, elementosDireita);
+            ImprimirBarrasNivel(nivel, maxNiveis, espacoEsquerda, espacoDireita, elementosEsquerda, elementosDireita);
+        }
+    }
+
+    static void ImprimirNivel(int nivel, int espacoEsquerda, int espacoDireita, int[] elementosEsquerda, int[] elementosDireita)
+    {
+        string linha = "";
             
-            // Valor da esquerda
-            if (nivel < esquerda.Length)
-            {
-                linha = new string(' ', espacoEsquerda) + esquerda[nivel];
-            }
+        // Valor da esquerda
+        if (nivel < elementosEsquerda.Length)
+        {
+            linha = new string(' ', espacoEsquerda) + elementosEsquerda[nivel];
+        }
 
-            // Valor da direita
-            if (nivel < direita.Length)
-            {
-                int espacoAteProximo = Math.Max(2, espacoDireita - linha.Length);
-                linha += new string(' ', espacoAteProximo) + direita[nivel];
-            }
+        // Valor da direita
+        if (nivel < elementosDireita.Length)
+        {
+            int espacoAteProximo = Math.Max(2, espacoDireita - linha.Length);
+            linha += new string(' ', espacoAteProximo) + elementosDireita[nivel];
+        }
 
-            Console.WriteLine(linha);
+        Console.WriteLine(linha);
+    }
 
-            // Imprime as barras para o próximo nível
-            if (nivel + 1 < maxLen)
-            {
-                string linhaBarras = "";
+    static void ImprimirBarrasNivel(int nivel, int maxNiveis, int espacoEsquerda, int espacoDireita, int[] elementosEsquerda, int[] elementosDireita)
+    {
+        if (nivel + 1 < maxNiveis)
+        {
+            string linhaBarras = "";
                 
-                // Barra da esquerda
-                if (nivel + 1 < esquerda.Length)
-                {
-                    linhaBarras = new string(' ', espacoEsquerda) + "/";
-                }
-
-                // Barra da direita
-                if (nivel + 1 < direita.Length)
-                {
-                    int espacoAteProximo = Math.Max(2, espacoDireita - linhaBarras.Length);
-                    linhaBarras += new string(' ', espacoAteProximo) + "\\";
-                }
-
-                if (!string.IsNullOrEmpty(linhaBarras))
-                    Console.WriteLine(linhaBarras);
+            // Barra da esquerda
+            if (nivel + 1 < elementosEsquerda.Length)
+            {
+                linhaBarras = new string(' ', espacoEsquerda) + "/";
             }
+
+            // Barra da direita
+            if (nivel + 1 < elementosDireita.Length)
+            {
+                int espacoAteProximo = Math.Max(2, espacoDireita - linhaBarras.Length);
+                linhaBarras += new string(' ', espacoAteProximo) + "\\";
+            }
+
+            if (!string.IsNullOrEmpty(linhaBarras))
+                Console.WriteLine(linhaBarras);
         }
     }
 }
