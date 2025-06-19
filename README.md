@@ -70,7 +70,6 @@ Este projeto implementa um algoritmo em C# para construir e visualizar uma árvo
 
 - ✅ Construção automática da árvore baseada nas regras especificadas
 - ✅ Visualização clara da estrutura da árvore no console
-- ✅ Suporte a múltiplos cenários de teste
 - ✅ Controle fino sobre o espaçamento e formatação visual
 - ✅ Tratamento de casos especiais (arrays vazios, arrays com um elemento)
 
